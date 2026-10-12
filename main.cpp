@@ -1323,10 +1323,15 @@ D3D_FEATURE_LEVEL_12_2,D3D_FEATURE_LEVEL_12_1,D3D_FEATURE_LEVEL_12_0
 	UploadTextureData(textureResource.Get(), mipImages);
 
 	//DirectX::ScratchImage  mipImages2 = LoadTexture(modeData.material.textureFilePath);
-	DirectX::ScratchImage mipImages2 = LoadTexture("resources/monsterBall.png");
+	DirectX::ScratchImage mipImages2 = LoadTexture("resources/fence.png");
 	const DirectX::TexMetadata& metadata2 = mipImages2.GetMetadata();
 	Microsoft::WRL::ComPtr<ID3D12Resource> textureResource2 = CreateTextureResource(device.Get(), metadata2);
 	UploadTextureData(textureResource2.Get(), mipImages2);
+
+	//DirectX::ScratchImage fenceImages = LoadTexture("resources/fence.png");
+	//const DirectX::TexMetadata& fencedata = fenceImages.GetMetadata();
+	//Microsoft::WRL::ComPtr<ID3D12Resource> fenceResource = CreateTextureResource(device.Get(), fencedata);
+	//UploadTextureData(fenceResource.Get(), fenceImages);
 
 
 	//metDataをもとにSRVの設定

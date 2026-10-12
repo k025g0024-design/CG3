@@ -44,5 +44,10 @@ PixelShaderOutput main(VertexShaderOutput input)
 
     }
     
+    if (textureColor.a == 0.0)
+    {
+        discard;
+    }
+    
     return output;
 }
