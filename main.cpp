@@ -14,6 +14,8 @@
 #include<cassert>
 #include <numbers>
 
+#include"Particle.hlsli"
+
 #include <wrl.h>
 
 #pragma comment(lib,"d3d12.lib")
@@ -1058,7 +1060,18 @@ D3D_FEATURE_LEVEL_12_2,D3D_FEATURE_LEVEL_12_1,D3D_FEATURE_LEVEL_12_0
 	descriptionRootSignature.pStaticSamplers = staticSamplers;
 	descriptionRootSignature.NumStaticSamplers = _countof(staticSamplers);
 
+	/*パーティクル用*/
+	D3D12_DESCRIPTOR_RANGE descriptorRangeForInstancing[1] = {};
 
+	descriptorRangeForInstancing[0].BaseShaderRegister = 0;
+	descriptorRangeForInstancing[0].NumDescriptors = 1;
+	descriptorRangeForInstancing[0].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+	descriptorRangeForInstancing[0].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+
+	rootParameters[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+	rootParameters[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;
+	rootParameters[1].DescriptorTable.pDescriptorRanges = descriptorRangeForInstancing;
+	rootParameters[1].DescriptorTable.NumDescriptorRanges = _countof(descriptorRangeForInstancing);
 
 	Microsoft::WRL::ComPtr<ID3DBlob> signatureBlob = nullptr;
 	Microsoft::WRL::ComPtr<ID3DBlob> errorBlob = nullptr;
@@ -1196,111 +1209,117 @@ D3D_FEATURE_LEVEL_12_2,D3D_FEATURE_LEVEL_12_1,D3D_FEATURE_LEVEL_12_0
 	fenceVertexBufferView.StrideInBytes = sizeof(VertexData);
 	VertexData* fenceVertexData = nullptr;
 	vertexResource->Map(0, nullptr, reinterpret_cast<void**>(&fenceVertexData));
-	std::memcpy(fenceVertexData, fenceData.vertices.data(), sizeof(VertexData)* fenceData.vertices.size());
-
-	//ID3D12Resource* vertexResource = CreateBufferResource(device, sizeof(VertexData) * kNumSphereVertices);
-
-	//D3D12_CLEAR_VALUE depthClearValue{};
-	//depthClearValue.DepthStencil.Depth = 1.0f;
-	//depthClearValue.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
-
-	//D3D12_VERTEX_BUFFER_VIEW vertexBufferView{};
-	//vertexBufferView.BufferLocation = vertexResource->GetGPUVirtualAddress();
-	//vertexBufferView.SizeInBytes = sizeof(VertexData) * kNumSphereVertices;
-	//vertexBufferView.StrideInBytes = sizeof(VertexData);
-
-	//VertexData* vertexData = nullptr;
-	//vertexResource->Map(0, nullptr, reinterpret_cast<void**>(&vertexData));
-
-	//テクスチャ座標の計算
-	//float u = float(lonIndex) / float(kSubdivision);
-	//float v = 1.0f - float(latIndex) / float(kSubdivision);
-	//uint32_t starIndex = (latIndex * kSubdivision + lonIndex) * 6;
-
-	//球体の頂点データ生成ロジック
-	//const float kLonEvery = pi * 2.0f / float(kSubdivision);
-	//const float kLatEvery = pi / float(kSubdivision);
-	//for (latIndex = 0; latIndex < kSubdivision; ++latIndex)
-	//{
-	//	float lat = -pi / 2.0f + kLatEvery * latIndex;
-
-	//	for (lonIndex = 0; lonIndex < kSubdivision; ++lonIndex)
-	//	{
-	//		uint32_t start = (latIndex * kSubdivision + lonIndex) * 6;
-	//		float lon = lonIndex * kLonEvery;
-	//		//a
-	//		vertexData[start].position.x = cos(lat) * cos(lon);
-	//		vertexData[start].position.y = sin(lat);
-	//		vertexData[start].position.z = cos(lat) * sin(lon);
-	//		vertexData[start].position.w = 1.0f;
-
-	//		vertexData[start].texcoord.x = float(lonIndex) / float(kSubdivision);
-	//		vertexData[start].texcoord.y = 1.0f - float(latIndex) / float(kSubdivision);
-
-	//		vertexData[start].normal.x = vertexData[start].position.x;
-	//		vertexData[start].normal.y = vertexData[start].position.y;
-	//		vertexData[start].normal.z = vertexData[start].position.z;
+	std::memcpy(fenceVertexData, fenceData.vertices.data(), sizeof(VertexData) * fenceData.vertices.size());
 
 
-	//		//残り5頂点も順番に計算していく
-	//		//b
-	//		vertexData[start + 1].position.x = cos(lat + kLatEvery) * cos(lon);
-	//		vertexData[start + 1].position.y = sin(lat + kLatEvery);
-	//		vertexData[start + 1].position.z = cos(lat + kLatEvery) * sin(lon);
-	//		vertexData[start + 1].position.w = 1.0f;
+	const uint32_t kNumInstance = 10;
+	UINT instanceCount = 10;
 
-	//		vertexData[start + 1].texcoord.x = float(lonIndex) / float(kSubdivision);
-	//		vertexData[start + 1].texcoord.y = 1.0f - float(latIndex + 1) / float(kSubdivision);
-	//		//c
-	//		vertexData[start + 2].position.x = cos(lat) * cos(lon + kLonEvery);
-	//		vertexData[start + 2].position.y = sin(lat);
-	//		vertexData[start + 2].position.z = cos(lat) * sin(lon + kLonEvery);
-	//		vertexData[start + 2].position.w = 1.0f;
+	//Microsoft::WRL::ComPtr<ID3D12Resource>instancingResource =
 
-	//		vertexData[start + 2].texcoord.x = float(lonIndex + 1) / float(kSubdivision);
-	//		vertexData[start + 2].texcoord.y = 1.0f - float(latIndex) / float(kSubdivision);
+		//ID3D12Resource* vertexResource = CreateBufferResource(device, sizeof(VertexData) * kNumSphereVertices);
+
+		//D3D12_CLEAR_VALUE depthClearValue{};
+		//depthClearValue.DepthStencil.Depth = 1.0f;
+		//depthClearValue.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+
+		//D3D12_VERTEX_BUFFER_VIEW vertexBufferView{};
+		//vertexBufferView.BufferLocation = vertexResource->GetGPUVirtualAddress();
+		//vertexBufferView.SizeInBytes = sizeof(VertexData) * kNumSphereVertices;
+		//vertexBufferView.StrideInBytes = sizeof(VertexData);
+
+		//VertexData* vertexData = nullptr;
+		//vertexResource->Map(0, nullptr, reinterpret_cast<void**>(&vertexData));
+
+		//テクスチャ座標の計算
+		//float u = float(lonIndex) / float(kSubdivision);
+		//float v = 1.0f - float(latIndex) / float(kSubdivision);
+		//uint32_t starIndex = (latIndex * kSubdivision + lonIndex) * 6;
+
+		//球体の頂点データ生成ロジック
+		//const float kLonEvery = pi * 2.0f / float(kSubdivision);
+		//const float kLatEvery = pi / float(kSubdivision);
+		//for (latIndex = 0; latIndex < kSubdivision; ++latIndex)
+		//{
+		//	float lat = -pi / 2.0f + kLatEvery * latIndex;
+
+		//	for (lonIndex = 0; lonIndex < kSubdivision; ++lonIndex)
+		//	{
+		//		uint32_t start = (latIndex * kSubdivision + lonIndex) * 6;
+		//		float lon = lonIndex * kLonEvery;
+		//		//a
+		//		vertexData[start].position.x = cos(lat) * cos(lon);
+		//		vertexData[start].position.y = sin(lat);
+		//		vertexData[start].position.z = cos(lat) * sin(lon);
+		//		vertexData[start].position.w = 1.0f;
+
+		//		vertexData[start].texcoord.x = float(lonIndex) / float(kSubdivision);
+		//		vertexData[start].texcoord.y = 1.0f - float(latIndex) / float(kSubdivision);
+
+		//		vertexData[start].normal.x = vertexData[start].position.x;
+		//		vertexData[start].normal.y = vertexData[start].position.y;
+		//		vertexData[start].normal.z = vertexData[start].position.z;
 
 
-	//		//d
-	//		vertexData[start + 4].position.x = cos(lat + kLatEvery) * cos(lon + kLonEvery);
-	//		vertexData[start + 4].position.y = sin(lat + kLatEvery);
-	//		vertexData[start + 4].position.z = cos(lat + kLatEvery) * sin(lon + kLonEvery);
-	//		vertexData[start + 4].position.w = 1.0f;
+		//		//残り5頂点も順番に計算していく
+		//		//b
+		//		vertexData[start + 1].position.x = cos(lat + kLatEvery) * cos(lon);
+		//		vertexData[start + 1].position.y = sin(lat + kLatEvery);
+		//		vertexData[start + 1].position.z = cos(lat + kLatEvery) * sin(lon);
+		//		vertexData[start + 1].position.w = 1.0f;
 
-	//		vertexData[start + 4].texcoord.x = float(lonIndex + 1) / float(kSubdivision);
-	//		vertexData[start + 4].texcoord.y = 1.0f - float(latIndex + 1) / float(kSubdivision);
+		//		vertexData[start + 1].texcoord.x = float(lonIndex) / float(kSubdivision);
+		//		vertexData[start + 1].texcoord.y = 1.0f - float(latIndex + 1) / float(kSubdivision);
+		//		//c
+		//		vertexData[start + 2].position.x = cos(lat) * cos(lon + kLonEvery);
+		//		vertexData[start + 2].position.y = sin(lat);
+		//		vertexData[start + 2].position.z = cos(lat) * sin(lon + kLonEvery);
+		//		vertexData[start + 2].position.w = 1.0f;
 
-	//		vertexData[start + 3] = vertexData[start + 1];
-	//		vertexData[start + 5] = vertexData[start + 2];
-
-
-
-	//		vertexData[start + 1].normal.x = vertexData[start + 1].position.x;
-	//		vertexData[start + 1].normal.y = vertexData[start + 1].position.y;
-	//		vertexData[start + 1].normal.z = vertexData[start + 1].position.z;
-
+		//		vertexData[start + 2].texcoord.x = float(lonIndex + 1) / float(kSubdivision);
+		//		vertexData[start + 2].texcoord.y = 1.0f - float(latIndex) / float(kSubdivision);
 
 
-	//		vertexData[start + 2].normal.x = vertexData[start + 2].position.x;
-	//		vertexData[start + 2].normal.y = vertexData[start + 2].position.y;
-	//		vertexData[start + 2].normal.z = vertexData[start + 2].position.z;
+		//		//d
+		//		vertexData[start + 4].position.x = cos(lat + kLatEvery) * cos(lon + kLonEvery);
+		//		vertexData[start + 4].position.y = sin(lat + kLatEvery);
+		//		vertexData[start + 4].position.z = cos(lat + kLatEvery) * sin(lon + kLonEvery);
+		//		vertexData[start + 4].position.w = 1.0f;
 
-	//		vertexData[start + 3].normal.x = vertexData[start + 3].position.x;
-	//		vertexData[start + 3].normal.y = vertexData[start + 3].position.y;
-	//		vertexData[start + 3].normal.z = vertexData[start + 3].position.z;
+		//		vertexData[start + 4].texcoord.x = float(lonIndex + 1) / float(kSubdivision);
+		//		vertexData[start + 4].texcoord.y = 1.0f - float(latIndex + 1) / float(kSubdivision);
 
-	//		vertexData[start + 4].normal.x = vertexData[start + 4].position.x;
-	//		vertexData[start + 4].normal.y = vertexData[start + 4].position.y;
-	//		vertexData[start + 4].normal.z = vertexData[start + 4].position.z;
+		//		vertexData[start + 3] = vertexData[start + 1];
+		//		vertexData[start + 5] = vertexData[start + 2];
 
-	//		vertexData[start + 5].normal.x = vertexData[start + 5].position.x;
-	//		vertexData[start + 5].normal.y = vertexData[start + 5].position.y;
-	//		vertexData[start + 5].normal.z = vertexData[start + 5].position.z;
-	//	}
 
-	//}
 
-	//ビューポート
+		//		vertexData[start + 1].normal.x = vertexData[start + 1].position.x;
+		//		vertexData[start + 1].normal.y = vertexData[start + 1].position.y;
+		//		vertexData[start + 1].normal.z = vertexData[start + 1].position.z;
+
+
+
+		//		vertexData[start + 2].normal.x = vertexData[start + 2].position.x;
+		//		vertexData[start + 2].normal.y = vertexData[start + 2].position.y;
+		//		vertexData[start + 2].normal.z = vertexData[start + 2].position.z;
+
+		//		vertexData[start + 3].normal.x = vertexData[start + 3].position.x;
+		//		vertexData[start + 3].normal.y = vertexData[start + 3].position.y;
+		//		vertexData[start + 3].normal.z = vertexData[start + 3].position.z;
+
+		//		vertexData[start + 4].normal.x = vertexData[start + 4].position.x;
+		//		vertexData[start + 4].normal.y = vertexData[start + 4].position.y;
+		//		vertexData[start + 4].normal.z = vertexData[start + 4].position.z;
+
+		//		vertexData[start + 5].normal.x = vertexData[start + 5].position.x;
+		//		vertexData[start + 5].normal.y = vertexData[start + 5].position.y;
+		//		vertexData[start + 5].normal.z = vertexData[start + 5].position.z;
+		//	}
+
+		//}
+
+		//ビューポート
 	D3D12_VIEWPORT viewport{};
 	viewport.Width = kClientWidth;
 	viewport.Height = kClientHeight;
@@ -1656,8 +1675,8 @@ D3D_FEATURE_LEVEL_12_2,D3D_FEATURE_LEVEL_12_1,D3D_FEATURE_LEVEL_12_0
 			commandList->SetGraphicsRootDescriptorTable(2, useMonsterBall ? textureSrvHandleGPU2 : textureSrvHandleGPU);
 			commandList->SetGraphicsRootConstantBufferView(3, directionalLightResource->GetGPUVirtualAddress());
 
-			//commandList->DrawInstanced(UINT(modeData.vertices.size()), 1, 0, 0);
-			commandList->DrawInstanced(UINT(fenceData.vertices.size()), 1, 0, 0);
+			commandList->DrawInstanced(UINT(modeData.vertices.size()), 1, 0, 0);
+			//commandList->DrawInstanced(UINT(fenceData.vertices.size()), 1, 0, 0);
 
 			//commandList->DrawInstanced(6, 1, 0, 0);
 			commandList->DrawIndexedInstanced(6, 1, 0, 0, 0);
@@ -1671,7 +1690,12 @@ D3D_FEATURE_LEVEL_12_2,D3D_FEATURE_LEVEL_12_1,D3D_FEATURE_LEVEL_12_0
 			commandList->SetGraphicsRootConstantBufferView(0, materialResourceSprite->GetGPUVirtualAddress());
 			commandList->DrawInstanced(6, 1, 0, 0);
 
-			//commandList->
+			for (int i = 0; 1 <= 10; i++)
+			{
+				commandList->SetGraphicsRootConstantBufferView(0 + i, materialResourceSprite->GetGPUVirtualAddress());
+				commandList->DrawInstanced(UINT(modeData.vertices.size()), instanceCount, 0, 0);
+			}
+
 
 #ifdef  USE_IMGUI
 			ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), commandList.Get());
