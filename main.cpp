@@ -1690,10 +1690,24 @@ D3D_FEATURE_LEVEL_12_2,D3D_FEATURE_LEVEL_12_1,D3D_FEATURE_LEVEL_12_0
 			commandList->SetGraphicsRootConstantBufferView(0, materialResourceSprite->GetGPUVirtualAddress());
 			commandList->DrawInstanced(6, 1, 0, 0);
 
-			for (int i = 0; 1 <= 10; i++)
+			for (int i = 0; i < 10; i++)
 			{
-				commandList->SetGraphicsRootConstantBufferView(0 + i, materialResourceSprite->GetGPUVirtualAddress());
-				commandList->DrawInstanced(UINT(modeData.vertices.size()), instanceCount, 0, 0);
+				Vector2 position;
+				// 右に100ずつずらす
+				position.x = 100.0f + 100.0f * i;
+
+
+				commandList->SetGraphicsRootConstantBufferView(
+					0 + i,
+					materialResourceSprite->GetGPUVirtualAddress()
+				);
+
+				commandList->DrawInstanced(
+					UINT(modeData.vertices.size()),
+					1,
+					0,
+					0
+				);
 			}
 
 
