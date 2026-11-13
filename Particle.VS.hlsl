@@ -1,4 +1,4 @@
-#include "Object3d.hlsli"
+#include"Particle.hlsli"
 
 // 1. 行列を受け取る構造体を定義
 struct TransformationMatrix
@@ -17,7 +17,7 @@ struct VertexShaderInput
     float32_t3 normal : NORMAL0;
 };
 
-VertexShaderOutput main(VertexShaderInput input)
+VertexShaderOutput main(VertexShaderInput input, uint32_t instanceId :SV_InstanceID)
 {
     VertexShaderOutput output;
     

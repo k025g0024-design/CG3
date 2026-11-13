@@ -14,35 +14,38 @@ struct PixelShaderOutput
 
 PixelShaderOutput main(VertexShaderOutput input)
 {
+    
     PixelShaderOutput output;
-    output.color = gMaterial.color;
+    float32_t4 transformedUV = mul(float32_t4(input.texcoord, 0.0f, 1.0f), gMaterial.uvTransform);
     float32_t4 textureColor = gTexture.Sample(gSampler, input.texcoord);
-    
     output.color = gMaterial.color * textureColor;
-    
-    float4 transformedUV = mul(float32_t4(input.texcoord, 0.0f, 1.0f), gMaterial.uvTransform);
 
+    //output.color = gMaterial.color;
     
-    if (gMaterial.enableLighting != 0)
-    {
+    
+    //float4 transformedUV = mul(float32_t4(input.texcoord, 0.0f, 1.0f), gMaterial.uvTransform);
+
+    //陰陽
+    //if (gMaterial.enableLighting != 0)
+    //{
         //float cos = saturate(dot(normalize(input.normal), -gDirectionalLight.direction));
 
         
-        float NodotL = dot(normalize(input.normal), -gDirectionalLight.direction);
-        float cos = pow(NodotL * 0.5f + 0.5f, 2.0f);
+     //   float NodotL = dot(normalize(input.normal), -gDirectionalLight.direction);
+       // float cos = pow(NodotL * 0.5f + 0.5f, 2.0f);
         
-        float32_t4 textureColor = gTexture.Sample(gSampler, transformedUV.xy);
+       // float32_t4 textureColor = gTexture.Sample(gSampler, transformedUV.xy);
 
-       output.color.rgb = gMaterial.color.rgb * textureColor.rgb * gDirectionalLight.color.rgb * cos * gDirectionalLight.intensity;
-        output.color.a = gMaterial.color.a * textureColor.a;
-        //output.color = gMaterial.color * textureColor * gDirectionalLight.color * cos * gDirectionalLight.intensity;
-        //output.color.a = textureColor.a;
-    }
-    else
-    {
-        output.color = gMaterial.color * textureColor;
+      // output.color.rgb = gMaterial.color.rgb * textureColor.rgb * gDirectionalLight.color.rgb * cos * gDirectionalLight.intensity;
+       // output.color.a = gMaterial.color.a * textureColor.a;
+        ////output.color = gMaterial.color * textureColor * gDirectionalLight.color * cos * gDirectionalLight.intensity;
+        ////output.color.a = textureColor.a;
+   // }
+    //else
+    //{
+      //  output.color = gMaterial.color * textureColor;
 
-    }
+    //}
     
     if (textureColor.a == 0.0)
     {
