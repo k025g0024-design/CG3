@@ -797,7 +797,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int)
 	HWND hwnd = CreateWindow
 	(
 		wc.lpszClassName, //クラス名
-		L"CG2", //ウィンドウタイトル
+		L"LE2D_14_スズキ_ユウナ", //ウィンドウタイトル
 		WS_OVERLAPPEDWINDOW, //ウィンドウスタイル
 		CW_USEDEFAULT,
 		CW_USEDEFAULT,
